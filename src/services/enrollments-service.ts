@@ -1,9 +1,10 @@
 import { Address, Enrollment } from '@prisma/client';
 import { isValidCEP } from '@brazilian-utils/brazilian-utils';
 import { request } from '@/utils/request';
-import { invalidDataError, notFoundError, requestError } from '@/errors';
+import { invalidDataError, enrollmentNotFoundError, requestError, invalidCepError } from '@/errors';
 import { addressRepository, CreateAddressParams, enrollmentRepository, CreateEnrollmentParams } from '@/repositories';
 import { exclude } from '@/utils/prisma-utils';
+import { AddressEnrollment } from '@/protocols';
 
 async function getAddressFromCEP(cep: string | number) {
   if (!isValidCEP(`${cep}`)) {
@@ -14,7 +15,7 @@ async function getAddressFromCEP(cep: string | number) {
     throw requestError(400, 'BadRquest');
   }
 
-  const body = {
+  const body: AddressEnrollment = {
     logradouro: result.data.logradouro,
     complemento: result.data.complemento,
     bairro: result.data.bairro,
