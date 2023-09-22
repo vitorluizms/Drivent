@@ -31,6 +31,6 @@ async function postTicketByUser(userId: number, ticketTypeId: number) {
   return result;
 }
 
-export type createTicket = { ticketTypeId: number };
+export type CreateTicket = { ticketTypeId: number };
 
 export const ticketsService = { getTypes, getTicketsByUser, postTicketByUser };
