@@ -21,4 +21,16 @@ async function getTicketsByUser(userId: number): Promise<Ticket & { TicketType: 
   return body;
 }
 
-export const ticketsService = { getTypes, getTicketsByUser };
+async function postTicketByUser(userId: number, ticketTypeId: number) {
+  const validate = await ticketsRepository.getEnrollmentsByUser(userId);
+  if (validate.length === 0) {
+    throw notFoundError();
+  }
+
+  const result = await ticketsRepository.postTicketByUser(ticketTypeId, validate[0].id);
+  return result;
+}
+
+export type createTicket = { ticketTypeId: number };
+
+export const ticketsService = { getTypes, getTicketsByUser, postTicketByUser };

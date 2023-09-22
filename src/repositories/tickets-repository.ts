@@ -13,7 +13,7 @@ async function getEnrollmentsByUser(userId: number): Promise<Enrollment[]> {
   return result;
 }
 
-async function getTicketsByUser(userId: number) {
+async function getTicketsByUser(userId: number): Promise<(Ticket & { TicketType: TicketType })[]> {
   const result = await prisma.ticket.findMany({
     where: { Enrollment: { userId: userId } },
     include: { TicketType: true },
@@ -21,4 +21,20 @@ async function getTicketsByUser(userId: number) {
   return result;
 }
 
-export const ticketsRepository = { getTypes, getTicketsByUser, getEnrollmentsByUser };
+async function postTicketByUser(
+  ticketTypeId: number,
+  enrollmentId: number,
+): Promise<Ticket & { TicketType: TicketType }> {
+  const result = await prisma.ticket.create({
+    data: {
+      ticketTypeId,
+      enrollmentId,
+      status: 'RESERVED',
+    },
+    include: { TicketType: true },
+  });
+
+  return result;
+}
+
+export const ticketsRepository = { getTypes, getTicketsByUser, getEnrollmentsByUser, postTicketByUser };
