@@ -9,25 +9,24 @@ async function getTypes(): Promise<TicketType[]> {
 
 async function getTicketsByUser(userId: number): Promise<Ticket & { TicketType: TicketType }> {
   const validate = await ticketsRepository.getEnrollmentsByUser(userId);
-  if (validate.length === 0) {
+  if (!validate) {
     throw notFoundError();
   }
 
   const result = await ticketsRepository.getTicketsByUser(userId);
-  if (result.length === 0) {
+  if (!result) {
     throw notFoundError();
   }
-  const body = result[0];
-  return body;
+  return result;
 }
 
 async function postTicketByUser(userId: number, ticketTypeId: number) {
   const validate = await ticketsRepository.getEnrollmentsByUser(userId);
-  if (validate.length === 0) {
+  if (!validate) {
     throw notFoundError();
   }
 
-  const result = await ticketsRepository.postTicketByUser(ticketTypeId, validate[0].id);
+  const result = await ticketsRepository.postTicketByUser(ticketTypeId, validate.id);
   return result;
 }
 
