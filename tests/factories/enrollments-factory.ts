@@ -1,4 +1,4 @@
-import faker from '@faker-js/faker';
+import { faker } from '@faker-js/faker';
 import { generateCPF, getStates } from '@brazilian-utils/brazilian-utils';
 import { User } from '@prisma/client';
 
@@ -10,7 +10,7 @@ export async function createEnrollmentWithAddress(user?: User) {
 
   return prisma.enrollment.create({
     data: {
-      name: faker.name.findName(),
+      name: faker.name.firstName(),
       cpf: generateCPF(),
       birthday: faker.date.past(),
       phone: faker.phone.phoneNumber('(##) 9####-####'),
