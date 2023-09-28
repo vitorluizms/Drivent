@@ -8,17 +8,15 @@ async function getTicketByUser(userId: number) {
   return result;
 }
 
-async function validateTicket(userId: number): Promise<boolean> {
+async function validateTicket(userId: number) {
   const result = await prisma.ticket.findFirst({
     where: {
-      AND: {
-        Enrollment: { userId: userId },
-        status: 'PAID',
-        TicketType: { includesHotel: true, isRemote: false },
-      },
+      Enrollment: { userId: userId },
+      status: 'PAID',
+      TicketType: { includesHotel: true, isRemote: false },
     },
   });
-  return result ? true : false;
+  return result;
 }
 
 async function getHotels() {
@@ -26,4 +24,12 @@ async function getHotels() {
   return result;
 }
 
-export const hotelsRepository = { getTicketByUser, validateTicket, getHotels };
+async function getHotelById(hotelId: number) {
+  const result = await prisma.hotel.findUnique({
+    where: { id: hotelId },
+    include: { Rooms: true },
+  });
+  return result;
+}
+
+export const hotelsRepository = { getTicketByUser, validateTicket, getHotels, getHotelById };
