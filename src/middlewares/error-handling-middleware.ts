@@ -8,6 +8,10 @@ export function handleApplicationErrors(
   res: Response,
   next: NextFunction,
 ) {
+  if (err.name === 'paymentRequired') {
+    return res.status(httpStatus.PAYMENT_REQUIRED).send({ message: err.message });
+  }
+
   if (err.name === 'CannotEnrollBeforeStartDateError') {
     return res.status(httpStatus.BAD_REQUEST).send({
       message: err.message,
