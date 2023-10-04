@@ -10,6 +10,7 @@ import {
   enrollmentsRouter,
   ticketRouter,
   paymentsRouter,
+  hotelsRouter,
 } from '@/routers';
 import { loadEnv, connectDb, disconnectDB } from '@/config';
 import hotelsRouter from './routers/hotels-router';
