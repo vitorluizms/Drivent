@@ -16,6 +16,21 @@ export function createBookingAndRoom() {
   };
 }
 
+export function createBookingAndRoomForUser(userId: number) {
+  return {
+    id: Number(faker.random.numeric(1)),
+    userId,
+    Room: {
+      id: Number(faker.random.numeric(1)),
+      name: faker.commerce.productName(),
+      capacity: Number(faker.random.numeric(1)),
+      hotelId: Number(faker.random.numeric(1)),
+      createdAt: faker.date.past(),
+      updatedAt: faker.date.recent(),
+    },
+  };
+}
+
 export function createTicket(status: TicketStatus, isRemote: boolean, includesHotel: boolean): TicketWithType {
   return {
     id: Number(faker.random.numeric(1)),

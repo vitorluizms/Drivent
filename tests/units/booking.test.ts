@@ -2,7 +2,13 @@ import { bookingRepository } from '@/repositories/booking-repository';
 import { bookingService } from '@/services/booking-service';
 import faker from '@faker-js/faker';
 import { Booking, Room, Ticket } from '@prisma/client';
-import { createBooking, createBookingAndRoom, createRoom, createTicket } from '../factories/booking-factory';
+import {
+  createBooking,
+  createBookingAndRoom,
+  createBookingAndRoomForUser,
+  createRoom,
+  createTicket,
+} from '../factories/booking-factory';
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -136,7 +142,7 @@ describe('POST /booking', () => {
     });
 
     jest.spyOn(bookingRepository, 'getBookings').mockImplementationOnce((): any => {
-      return [createBooking(roomId, userId)];
+      return [createBooking(roomId, Number(faker.random.numeric(1)))];
     });
 
     const response = bookingService.createBooking(userId, roomId);
@@ -169,6 +175,7 @@ describe('POST /booking', () => {
     });
 
     const response = await bookingService.createBooking(userId, roomId);
+    expect(bookingRepository.createBooking).toBeCalledTimes(1);
     expect(response).toEqual(booking);
   });
 });
@@ -185,7 +192,82 @@ describe('POST /booking/:bookingId', () => {
 
     const response = bookingService.updateRoom(userId, roomId, bookingId);
     expect(response).rejects.toEqual({
-      
-    })
+      name: 'ForbiddenError',
+      message: "You don't have a booking",
+    });
+  });
+
+  it('should respond with not found error if room does not exists', async () => {
+    const userId: number = Number(faker.random.numeric(1));
+    const roomId: number = Number(faker.random.numeric(1));
+    const bookingId: number = Number(faker.random.numeric(1));
+
+    jest.spyOn(bookingRepository, 'getBookingAndRoomByUser').mockImplementationOnce((): any => {
+      return createBookingAndRoom();
+    });
+
+    jest.spyOn(bookingRepository, 'validateRoom').mockImplementationOnce((): any => {
+      return {};
+    });
+
+    const response = bookingService.updateRoom(userId, roomId, bookingId);
+    expect(response).rejects.toEqual({
+      name: 'NotFoundError',
+      message: 'No result for this search!',
+    });
+  });
+
+  it('should respond with forbidden error if room is full', async () => {
+    const userId: number = Number(faker.random.numeric(1));
+    const roomId: number = Number(faker.random.numeric(1));
+    const bookingId: number = Number(faker.random.numeric(1));
+
+    jest.spyOn(bookingRepository, 'getBookingAndRoomByUser').mockImplementationOnce((): any => {
+      return createBookingAndRoom();
+    });
+
+    jest.spyOn(bookingRepository, 'validateRoom').mockImplementationOnce((): any => {
+      return createRoom(roomId, 1);
+    });
+
+    jest.spyOn(bookingRepository, 'getBookings').mockImplementationOnce((): any => {
+      return [createBooking(roomId, Number(faker.random.numeric(1)))];
+    });
+
+    const response = bookingService.updateRoom(userId, roomId, bookingId);
+    expect(response).rejects.toEqual({
+      name: 'ConflictError',
+      message: 'The room is full',
+    });
+  });
+
+  it('should update with success and respond with bookingId', async () => {
+    const userId: number = Number(faker.random.numeric(1));
+    const roomId: number = Number(faker.random.numeric(1));
+    const bookingId: number = Number(faker.random.numeric(1));
+
+    jest.spyOn(bookingRepository, 'getBookingAndRoomByUser').mockImplementationOnce((): any => {
+      return createBookingAndRoom();
+    });
+
+    jest.spyOn(bookingRepository, 'validateRoom').mockImplementationOnce((): any => {
+      return createRoom(roomId, 1);
+    });
+
+    jest.spyOn(bookingRepository, 'getBookings').mockImplementationOnce((): any => {
+      return [];
+    });
+
+    jest.spyOn(bookingRepository, 'updateRoom').mockImplementationOnce((): any => {
+      return {
+        bookingId,
+      };
+    });
+
+    const response = await bookingService.updateRoom(userId, roomId, bookingId);
+    expect(bookingRepository.updateRoom).toBeCalledTimes(1);
+    expect(response).toEqual({
+      bookingId,
+    });
   });
 });
