@@ -18,12 +18,11 @@ beforeEach(() => {
 describe(' GET /booking ', () => {
   it('should respond with notFoundError if user does not have a booking', async () => {
     const userId: number = Number(faker.random.numeric(1));
-    jest.spyOn(bookingRepository, 'getBookingAndRoomByUser').mockImplementationOnce((): any => {
-      return {};
-    });
+    jest.spyOn(bookingRepository, 'getBookingAndRoomByUser').mockResolvedValueOnce(null);
 
     const response = bookingService.getBookingByUser(userId);
 
+    console.log(response);
     expect(bookingRepository.getBookingAndRoomByUser).toBeCalledTimes(1);
     expect(response).rejects.toEqual({
       name: 'NotFoundError',
@@ -51,7 +50,7 @@ describe('POST /booking', () => {
     const roomId: number = Number(faker.random.numeric(1));
 
     jest.spyOn(bookingRepository, 'validateTicket').mockImplementationOnce((): any => {
-      return {};
+      return null;
     });
 
     const response = bookingService.createBooking(userId, roomId);
@@ -102,7 +101,7 @@ describe('POST /booking', () => {
     const response = bookingService.createBooking(userId, roomId);
     expect(response).rejects.toEqual({
       name: 'ForbiddenError',
-      message: 'Your ticket is remote',
+      message: 'Your ticket do not include hotel',
     });
   });
 
@@ -115,7 +114,11 @@ describe('POST /booking', () => {
     });
 
     jest.spyOn(bookingRepository, 'validateRoom').mockImplementationOnce((): any => {
-      return {};
+      return null;
+    });
+
+    jest.spyOn(bookingRepository, 'getBookings').mockImplementationOnce((): any => {
+      return [];
     });
 
     const response = bookingService.createBooking(userId, roomId);
@@ -151,6 +154,7 @@ describe('POST /booking', () => {
   it('should create with success and respond with bookingId', async () => {
     const userId: number = Number(faker.random.numeric(1));
     const roomId: number = Number(faker.random.numeric(1));
+    const bookingId: number = Number(faker.random.numeric(1));
 
     jest.spyOn(bookingRepository, 'validateTicket').mockImplementationOnce((): any => {
       return createTicket('PAID', false, true);
@@ -164,15 +168,15 @@ describe('POST /booking', () => {
       return [];
     });
 
-    const booking = jest.spyOn(bookingRepository, 'createBooking').mockImplementationOnce((): any => {
+    jest.spyOn(bookingRepository, 'createBooking').mockImplementationOnce((): any => {
       return {
-        bookingId: Number(faker.random.numeric(1)),
+        bookingId: bookingId,
       };
     });
 
     const response = await bookingService.createBooking(userId, roomId);
     expect(bookingRepository.createBooking).toBeCalledTimes(1);
-    expect(response).toEqual(booking);
+    expect(response).toEqual({ bookingId: bookingId });
   });
 });
 
@@ -183,10 +187,10 @@ describe('POST /booking/:bookingId', () => {
     const bookingId: number = Number(faker.random.numeric(1));
 
     jest.spyOn(bookingRepository, 'getBookingAndRoomByUser').mockImplementationOnce((): any => {
-      return {};
+      return null;
     });
 
-    const response = bookingService.updateRoom(userId, roomId, bookingId);
+    const response = await bookingService.updateRoom(userId, roomId, bookingId);
     expect(response).rejects.toEqual({
       name: 'ForbiddenError',
       message: "You don't have a booking",
@@ -203,10 +207,10 @@ describe('POST /booking/:bookingId', () => {
     });
 
     jest.spyOn(bookingRepository, 'validateRoom').mockImplementationOnce((): any => {
-      return {};
+      return null;
     });
 
-    const response = bookingService.updateRoom(userId, roomId, bookingId);
+    const response = await bookingService.updateRoom(userId, roomId, bookingId);
     expect(response).rejects.toEqual({
       name: 'NotFoundError',
       message: 'No result for this search!',
@@ -230,7 +234,7 @@ describe('POST /booking/:bookingId', () => {
       return [createBooking(roomId, Number(faker.random.numeric(1)))];
     });
 
-    const response = bookingService.updateRoom(userId, roomId, bookingId);
+    const response = await bookingService.updateRoom(userId, roomId, bookingId);
     expect(response).rejects.toEqual({
       name: 'ConflictError',
       message: 'The room is full',
