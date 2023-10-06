@@ -5,6 +5,7 @@ import { createSession } from './factories/sessions-factory';
 import { prisma } from '@/config';
 
 export async function cleanDb() {
+  await prisma.booking.deleteMany({});
   await prisma.address.deleteMany({});
   await prisma.payment.deleteMany({});
   await prisma.ticket.deleteMany({});
@@ -15,7 +16,6 @@ export async function cleanDb() {
   await prisma.user.deleteMany({});
   await prisma.room.deleteMany({});
   await prisma.hotel.deleteMany({});
-  await prisma.booking.deleteMany({});
 }
 
 export async function generateValidToken(user?: User) {

@@ -190,7 +190,7 @@ describe('POST /booking/:bookingId', () => {
       return null;
     });
 
-    const response = await bookingService.updateRoom(userId, roomId, bookingId);
+    const response = bookingService.updateRoom(userId, roomId, bookingId);
     expect(response).rejects.toEqual({
       name: 'ForbiddenError',
       message: "You don't have a booking",
@@ -210,7 +210,11 @@ describe('POST /booking/:bookingId', () => {
       return null;
     });
 
-    const response = await bookingService.updateRoom(userId, roomId, bookingId);
+    jest.spyOn(bookingRepository, 'getBookings').mockImplementationOnce((): any => {
+      return [];
+    });
+
+    const response = bookingService.updateRoom(userId, roomId, bookingId);
     expect(response).rejects.toEqual({
       name: 'NotFoundError',
       message: 'No result for this search!',
@@ -234,10 +238,10 @@ describe('POST /booking/:bookingId', () => {
       return [createBooking(roomId, Number(faker.random.numeric(1)))];
     });
 
-    const response = await bookingService.updateRoom(userId, roomId, bookingId);
+    const response = bookingService.updateRoom(userId, roomId, bookingId);
     expect(response).rejects.toEqual({
-      name: 'ConflictError',
-      message: 'The room is full',
+      name: 'ForbiddenError',
+      message: 'This room is full',
     });
   });
 

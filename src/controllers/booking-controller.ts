@@ -1,3 +1,4 @@
+import { invalidDataError } from '@/errors';
 import { AuthenticatedRequest } from '@/middlewares';
 import { bookingService } from '@/services/booking-service';
 import { Response } from 'express';
@@ -14,9 +15,20 @@ async function createBooking(req: AuthenticatedRequest, res: Response) {
   const { roomId } = req.body;
 
   const result = await bookingService.createBooking(userId, roomId);
-  res.status(201).send(result)
+  res.status(201).send(result);
 }
 
-async function updateRoomId(req: AuthenticatedRequest, res: Response) {}
+async function updateRoomId(req: AuthenticatedRequest, res: Response) {
+  const { userId } = req;
+  const { bookingId } = req.params;
+  const { roomId } = req.body;
+
+  if (isNaN(Number(bookingId))) {
+    throw invalidDataError('bookingId invalid');
+  }
+
+  const result = await bookingService.updateRoom(userId, roomId, Number(bookingId));
+  res.status(201).send(result);
+}
 
 export const bookingController = { getBookingByUser, createBooking, updateRoomId };

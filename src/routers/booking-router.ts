@@ -9,3 +9,5 @@ bookingRouter.use(authenticateToken);
 bookingRouter.get('/', bookingController.getBookingByUser);
 bookingRouter.post('/', validateBody(bookingSchema), bookingController.createBooking);
 bookingRouter.put('/:bookingId', validateBody(bookingSchema), bookingController.updateRoomId);
+
+export default bookingRouter;

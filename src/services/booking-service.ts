@@ -23,7 +23,19 @@ async function createBooking(userId: number, roomId: number) {
   return response;
 }
 
-async function updateRoom(userId: number, roomId: number, bookingId: number) {}
+async function updateRoom(userId: number, roomId: number, bookingId: number) {
+  const booking = await bookingRepository.getBookingAndRoomByUser(userId);
+  if (!booking) {
+    throw forbiddenError("You don't have a booking");
+  }
+
+  const room = await bookingRepository.validateRoom(roomId);
+  const bookings = await bookingRepository.getBookings(roomId);
+  validateRoomAndCapacity(room, bookings);
+
+  const update = await bookingRepository.updateRoom(bookingId, roomId);
+  return update;
+}
 
 function validateTicketwithType(ticket: Ticket & { TicketType: TicketType }) {
   if (!ticket) {

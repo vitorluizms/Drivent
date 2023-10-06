@@ -58,7 +58,14 @@ describe('GET /booking', () => {
       expect(response.status).toBe(httpStatus.OK);
       expect(response.body).toEqual({
         id: booking.id,
-        Room: room,
+        Room: {
+          id: room.id,
+          name: room.name,
+          capacity: room.capacity,
+          hotelId: room.hotelId,
+          createdAt: room.createdAt.toISOString(),
+          updatedAt: room.updatedAt.toISOString(),
+        },
       });
     });
   });
@@ -88,14 +95,16 @@ describe('POST /booking', () => {
 
   describe('when given token is valid', () => {
     it('should respond with status 400 if no body is given', async () => {
-      const token = generateValidToken();
+      const user = await createUser();
+      const token = await generateValidToken(user);
 
       const response = await server.post('/booking').set('Authorization', `Bearer ${token}`);
       expect(response.status).toBe(httpStatus.BAD_REQUEST);
     });
 
     it('should respond with status 400 if given body is invalid', async () => {
-      const token = generateValidToken();
+      const user = await createUser();
+      const token = await generateValidToken(user);
       const body = { roomId: 'a' };
 
       const response = await server.post('/booking').set('Authorization', `Bearer ${token}`).send(body);
@@ -114,7 +123,7 @@ describe('POST /booking', () => {
       const body: { roomId: number } = { roomId: room.id };
 
       const response = await server.post('/booking').set('Authorization', `Bearer ${token}`).send(body);
-      expect(response).toBe(httpStatus.INTERNAL_SERVER_ERROR);
+      expect(response.status).toBe(httpStatus.INTERNAL_SERVER_ERROR);
     });
 
     it('should create with success and respond with status 201', async () => {
@@ -160,27 +169,30 @@ describe('PUT /booking/:bookingId', () => {
 
   describe('when given token is valid', () => {
     it('should respond with status 400 if no body is given', async () => {
-      const token = generateValidToken();
+      const user = await createUser();
+      const token = await generateValidToken(user);
 
-      const response = await server.post('/booking/1').set('Authorization', `Bearer ${token}`);
+      const response = await server.put('/booking/1').set('Authorization', `Bearer ${token}`);
       expect(response.status).toBe(httpStatus.BAD_REQUEST);
     });
 
     it('should respond with status 400 if given body is invalid', async () => {
-      const token = generateValidToken();
+      const user = await createUser();
+      const token = await generateValidToken(user);
       const body = { roomId: 'a' };
 
-      const response = await server.post('/booking/1').set('Authorization', `Bearer ${token}`).send(body);
+      const response = await server.put('/booking/1').set('Authorization', `Bearer ${token}`).send(body);
       expect(response.status).toBe(httpStatus.BAD_REQUEST);
     });
 
     it('should respond with status 400 if query param is invalid', async () => {
-      const token = generateValidToken();
+      const user = await createUser();
+      const token = await generateValidToken(user);
       const body: { roomId: number } = { roomId: 2 };
 
-      const response = await server.post('/booking/aa').set('Authorization', `Bearer ${token}`).send(body);
+      const response = await server.put('/booking/aa').set('Authorization', `Bearer ${token}`).send(body);
       expect(response.status).toBe(httpStatus.BAD_REQUEST);
-      expect(response.body).toEqual({ name: 'InvalidDataError', message: `Invalid data: bookingId invalid` });
+      expect(response.body).toEqual({ message: `Invalid data: bookingId invalid` });
     });
 
     it('should update with success and respond with status 201', async () => {
@@ -195,7 +207,7 @@ describe('PUT /booking/:bookingId', () => {
       const booking = await createBookingPrisma(user.id, room.id);
       const body: { roomId: number } = { roomId: room2.id };
 
-      const response = await server.post(`/booking/${booking.id}`).set('Authorization', `Bearer ${token}`).send(body);
+      const response = await server.put(`/booking/${booking.id}`).set('Authorization', `Bearer ${token}`).send(body);
       expect(response.status).toBe(httpStatus.CREATED);
       expect(response.body).toEqual({
         bookingId: expect.any(Number),

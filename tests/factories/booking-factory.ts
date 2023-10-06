@@ -59,7 +59,7 @@ export function createTicket(status: TicketStatus, isRemote: boolean, includesHo
   };
 }
 
-export function createRoom(roomId: number, capacity: number): Room {
+export function createRoom(roomId: number, capacity: number) {
   return {
     id: roomId,
     name: faker.commerce.product(),
