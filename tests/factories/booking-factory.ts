@@ -1,6 +1,18 @@
+import { prisma } from '@/config';
 import { TicketWithType } from '@/protocols';
 import faker from '@faker-js/faker';
 import { Booking, Room, TicketStatus } from '@prisma/client';
+
+export async function createBookingPrisma(userId: number, roomId: number) {
+  const result = await prisma.booking.create({
+    data: {
+      userId,
+      roomId,
+    },
+  });
+
+  return result;
+}
 
 export function createBookingAndRoom() {
   return {

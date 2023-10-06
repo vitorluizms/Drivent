@@ -9,6 +9,7 @@ import {
   createRoom,
   createTicket,
 } from '../factories/booking-factory';
+import { BookingAndRoom } from '@/protocols';
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -18,7 +19,7 @@ describe(' GET /booking ', () => {
   it('should respond with notFoundError if user does not have a booking', async () => {
     const userId: number = Number(faker.random.numeric(1));
     jest.spyOn(bookingRepository, 'getBookingAndRoomByUser').mockImplementationOnce((): any => {
-      return undefined;
+      return {};
     });
 
     const response = bookingService.getBookingByUser(userId);
@@ -30,14 +31,9 @@ describe(' GET /booking ', () => {
     });
   });
 
-  type Booking = {
-    id: Number;
-    Room: Room;
-  };
-
   it('should respond with booking data', async () => {
     const userId: number = Number(faker.random.numeric(1));
-    const booking: Booking = createBookingAndRoom();
+    const booking: BookingAndRoom = createBookingAndRoom();
 
     jest.spyOn(bookingRepository, 'getBookingAndRoomByUser').mockImplementationOnce((): any => {
       return booking;
